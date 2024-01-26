@@ -8,6 +8,7 @@ mod pcip;
 mod pit;
 mod port_passthrough;
 mod uart16550;
+pub mod pci_dev;
 
 extern crate alloc;
 use alloc::{sync::Arc, vec, vec::Vec};
@@ -107,8 +108,9 @@ pub struct MsrDummy {
 }
 
 impl MsrDummy {
-    pub fn new(msr: u32) -> Self {
-        Self { msr_range: msr..msr+1 }
+    pub fn new(msr: u32, range:u32) -> Self {
+        // Self { msr_range: msr..msr+1 }
+        Self { msr_range: msr..msr+range }
     }
 
     pub fn new_range(range: core::ops::Range<u32>) -> Self {
