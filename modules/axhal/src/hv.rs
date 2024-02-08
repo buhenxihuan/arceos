@@ -48,3 +48,23 @@ impl HyperCraftHal for HyperCraftHalImpl {
         handle_vmexit(vcpu)
     }
 }
+
+/// This is just for test.
+/// VM Vcpu execute interface.
+///
+/// This trait is defined with the [`#[def_interface]`][1] attribute. 
+/// It's implemented with [`#[impl_interface]`][2] in `axvm`.
+///
+/// [1]: crate_interface::def_interface
+/// [2]: crate_interface::impl_interface
+#[def_interface]
+pub trait VMExecuteInterface {
+    /// VM Execute.
+    fn vm_run_vcpu(vm_id: usize, vcpu_id: usize) -> bool;
+}
+
+#[allow(dead_code)]
+#[no_mangle]
+pub fn vm_run_vcpu(vm_id: usize, vcpu_id: usize) -> bool {
+    call_interface!(VMExecuteInterface::vm_run_vcpu, vm_id, vcpu_id)
+}

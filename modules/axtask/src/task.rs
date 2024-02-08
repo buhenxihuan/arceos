@@ -58,10 +58,7 @@ pub enum TaskType {
     Process { trap_frame: Box<TrapFrame> },
     /// Virtual CPU.
     #[cfg(feature = "hv")]
-    Vcpu {
-        vm_id: usize,
-        vcpu: UnsafeCell<VCpu<HyperCraftHalImpl>>,
-    },
+    Vcpu { vm_id: usize, vcpu_id: usize },
 }
 
 /// The inner task structure.
@@ -439,16 +436,13 @@ impl TaskInner {
         stack_size: usize,
         vcpu_id: usize,
         vm_id: usize,
-        vcpu: VCpu<HyperCraftHalImpl>,
+        // vcpu: VCpu<HyperCraftHalImpl>,
         _page_table_token: usize,
     ) -> AxTaskRef {
         let mut t = Self::new_common(TaskId::new(), name);
         debug!("new task: {}", t.id_name());
         let kstack = TaskStack::alloc(align_up_4k(stack_size));
-        t.task_type = TaskType::Vcpu {
-            vm_id,
-            vcpu: UnsafeCell::new(vcpu),
-        };
+        t.task_type = TaskType::Vcpu { vm_id, vcpu_id };
         t.ctx
             .get_mut()
             .init(task_entry as usize, kstack.top(), PhysAddr::from(0));
@@ -599,12 +593,14 @@ extern "C" fn task_entry() -> ! {
             let kernel_sp = task.get_kernel_stack_top().unwrap();
             unsafe { trap_frame.exec(kernel_sp) }
         }
-        TaskType::Vcpu { vm_id, vcpu } => {
-            let vcpu = unsafe { vcpu.get().as_mut().unwrap() };
+        TaskType::Vcpu { vm_id, vcpu_id } => {
+            // let vcpu = unsafe { vcpu.get().as_mut().unwrap() };
             loop {
-                let exit_info = vcpu.run();
-                // let _ = vcpu.run();
-                warn!("Task vcpu exit {:?}", exit_info);
+                let exited = axhal::hv::vm_run_vcpu(*vm_id, *vcpu_id);
+                if exited {
+                    // warn!("Task vcpu exit {:?}", exit_info);
+                    crate::exit(0)
+                }
             }
         }
     }

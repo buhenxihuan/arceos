@@ -1,56 +1,108 @@
 use alloc::boxed::Box;
-use arrayvec::ArrayVec;
-use spin::Once;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
+use spin::Mutex;
 
 use super::arch::VCpu;
 use crate::Result;
 use axhal::hv::HyperCraftHalImpl;
 
-pub use hypercraft::{HyperCraftHal, PerCpuDevices, PerVmDevices, VmCpus, VM};
-
-// Todo: refactor this, move to arch?
-#[cfg(target_arch = "x86_64")]
 use super::device::{self, X64VcpuDevices, X64VmDevices};
+pub use hypercraft::{HyperCraftHal, HyperError, PerCpuDevices, PerVmDevices, VmCpus, VM};
 
-/// The maximum number of CPUs we can support.
-pub const MAX_CPUS: usize = 8;
+pub const CONFIG_VM_NUM_MAX: usize = 8;
 
-pub const VM_CPUS_MAX: usize = MAX_CPUS;
+static VM_LIST: Mutex<
+    Vec<
+        Arc<
+            VM<
+                HyperCraftHalImpl,
+                X64VcpuDevices<HyperCraftHalImpl>,
+                X64VmDevices<HyperCraftHalImpl>,
+            >,
+        >,
+    >,
+> = Mutex::new(Vec::new());
 
-pub struct VMInner<H: HyperCraftHal, PD: PerCpuDevices<H>, VD: PerVmDevices<H>> {
-    vm: VM<H, PD, VD>,
-    vcpus: VmCpus<H, PD>,
-    inner: [Once<VCpu<H>>; VM_CPUS_MAX],
-    device: [Once<PD>; VM_CPUS_MAX],
+#[inline]
+pub fn vm_list_walker<F>(mut f: F)
+where
+    F: FnMut(
+        &Arc<
+            VM<
+                HyperCraftHalImpl,
+                X64VcpuDevices<HyperCraftHalImpl>,
+                X64VmDevices<HyperCraftHalImpl>,
+            >,
+        >,
+    ),
+{
+    let vm_list = VM_LIST.lock();
+    for vm in vm_list.iter() {
+        f(vm);
+    }
 }
 
-impl<H: HyperCraftHal, PD: PerCpuDevices<H>, VD: PerVmDevices<H>> VMInner<H, PD, VD> {
-    pub fn new(vcpus: VmCpus<H, PD>) -> Self {
-        Self {
-            vm: VM::<H, PD, VD>::new(vcpus),
-            vcpus,
-        }
+pub fn push_vm(
+    id: usize,
+    vcpus: VmCpus<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl>>,
+) -> Result<
+    Arc<VM<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl>, X64VmDevices<HyperCraftHalImpl>>>,
+> {
+    let mut vm_list = VM_LIST.lock();
+
+    let mut vm = VM::<
+        HyperCraftHalImpl,
+        X64VcpuDevices<HyperCraftHalImpl>,
+        X64VmDevices<HyperCraftHalImpl>,
+    >::new(id, vcpus);
+
+    let (_, dev) = vm.get_vcpu_and_device(0).unwrap();
+    *(dev.console.lock().backend()) = device::device_emu::MultiplexConsoleBackend::Primary;
+
+    let this = Arc::new(vm);
+
+    if id >= CONFIG_VM_NUM_MAX || vm_list.iter().any(|x| x.id() == id) {
+        error!("push_vm: vm {} already exists", id);
+        Err(HyperError::OutOfRange)
+    } else {
+        let vm = this;
+        vm_list.push(vm.clone());
+        Ok(vm)
     }
+}
 
-    pub fn bind_cpu(&mut self) {
-        self.vm.bind_vcpu(0).expect("bind vcpu failed");
-    }
-
-    pub fn run(&mut self) {
-        crate::arch::cpu_hv_hardware_enable(hart_id);
-        // if hart_id == 0 {
-        let (_, dev) = self.vm.get_vcpu_and_device(0).unwrap();
-        *(dev.console.lock().backend()) = device::device_emu::MultiplexConsoleBackend::Primary;
-
-        for v in 0..256 {
-            crate::irq::set_host_irq_enabled(v, true);
+pub fn remove_vm(
+    id: usize,
+) -> Arc<VM<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl>, X64VmDevices<HyperCraftHalImpl>>>
+{
+    let mut vm_list = VM_LIST.lock();
+    match vm_list.iter().position(|x| x.id() == id) {
+        None => {
+            panic!("VM[{}] not exist in VM LIST", id);
         }
-        // }
-        info!("Running guest...");
-        self.vm.run_vcpu(0);
+        Some(idx) => vm_list.remove(idx),
+    }
+}
 
-        crate::arch::cpu_hv_hardware_disable();
+pub fn vm_by_id(
+    id: usize,
+) -> Option<
+    Arc<VM<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl>, X64VmDevices<HyperCraftHalImpl>>>,
+> {
+    let vm_list = VM_LIST.lock();
+    vm_list.iter().find(|&x| x.id() == id).cloned()
+}
 
-        panic!("done");
+struct VMExecuteInterfaceImpl;
+
+#[crate_interface::impl_interface]
+impl axhal::hv::VMExecuteInterface for VMExecuteInterfaceImpl {
+    fn vm_run_vcpu(vm_id: usize, vcpu_id: usize) -> bool {
+        let mut vm = vm_by_id(vm_id).expect("VM not exist");
+
+        let _ = vm.run_vcpu(vcpu_id);
+
+        true
     }
 }
