@@ -39,6 +39,9 @@ pub fn config_boot_first_vm(hart_id: usize) {
     let mut vcpus = VmCpus::<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl>>::new();
     vcpus.add_vcpu(vcpu).expect("add vcpu failed");
 
+    let (_, device) = vcpus.get_vcpu_and_device(0).unwrap();
+    *(device.console.lock().backend()) = device::device_emu::MultiplexConsoleBackend::Primary;
+
     let vm = crate::vm::push_vm(0, vcpus).unwrap();
 
     let new_task = TaskInner::new_vcpu(

@@ -57,9 +57,6 @@ pub fn push_vm(
         X64VmDevices<HyperCraftHalImpl>,
     >::new(id, vcpus);
 
-    let (_, dev) = vm.get_vcpu_and_device(0).unwrap();
-    *(dev.console.lock().backend()) = device::device_emu::MultiplexConsoleBackend::Primary;
-
     let this = Arc::new(vm);
 
     if id >= CONFIG_VM_NUM_MAX || vm_list.iter().any(|x| x.id() == id) {
@@ -99,7 +96,7 @@ struct VMExecuteInterfaceImpl;
 #[crate_interface::impl_interface]
 impl axhal::hv::VMExecuteInterface for VMExecuteInterfaceImpl {
     fn vm_run_vcpu(vm_id: usize, vcpu_id: usize) -> bool {
-        let mut vm = vm_by_id(vm_id).expect("VM not exist");
+        let vm = vm_by_id(vm_id).expect("VM not exist");
 
         let _ = vm.run_vcpu(vcpu_id);
 
