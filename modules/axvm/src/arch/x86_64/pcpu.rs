@@ -12,7 +12,8 @@ use crate::Result;
 #[percpu::def_percpu]
 static HV_PER_CPU: LazyInit<PerCpu<HyperCraftHalImpl>> = LazyInit::new();
 
-pub fn cpu_hv_hardware_enable(hart_id: usize) -> Result {
+pub fn cpu_hv_hardware_enable() -> Result {
+    let hart_id = axhal::cpu::this_cpu_id();
     info!("Core [{hart_id}] init hardware support for virtualization...");
 
     let per_cpu = unsafe { HV_PER_CPU.current_ref_mut_raw() };

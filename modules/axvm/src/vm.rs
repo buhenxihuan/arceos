@@ -96,10 +96,14 @@ struct VMExecuteInterfaceImpl;
 #[crate_interface::impl_interface]
 impl axhal::hv::VMExecuteInterface for VMExecuteInterfaceImpl {
     fn vm_run_vcpu(vm_id: usize, vcpu_id: usize) -> bool {
+        debug!("vm_run_vcpu VM {} vcpu {}", vm_id, vcpu_id);
+        // crate::arch::cpu_hv_hardware_enable();
+
         let vm = vm_by_id(vm_id).expect("VM not exist");
 
-        let _ = vm.run_vcpu(vcpu_id);
+        let _ = vm.run_vcpu(vcpu_id, crate::arch::cpu_vmcs_revision_id());
 
+        // crate::arch::cpu_hv_hardware_disable();
         true
     }
 }

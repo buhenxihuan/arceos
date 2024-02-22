@@ -19,7 +19,7 @@ pub fn config_boot_first_vm(hart_id: usize) {
     info!("into main {}", hart_id);
 
     // Fix: this function shoule be moved to somewhere like vm_entry.
-    // crate::arch::cpu_hv_hardware_enable(hart_id);
+    crate::arch::cpu_hv_hardware_enable();
 
     // Alloc guest memory set.
     // Fix: this should be stored inside VM structure.
@@ -69,6 +69,7 @@ pub fn config_boot_first_vm(hart_id: usize) {
     // info!("{:?}", vm.run_vcpu(0));
 
     // crate::arch::cpu_hv_hardware_disable();
+    RUN_QUEUE.lock().add_task(new_task);
 
-    panic!("done");
+    info!("config_boot_first_vm done");
 }
