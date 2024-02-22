@@ -103,7 +103,7 @@ impl axhal::hv::VMExecuteInterface for VMExecuteInterfaceImpl {
 
         let _ = vm.run_vcpu(vcpu_id, crate::arch::cpu_vmcs_revision_id());
 
-        // crate::arch::cpu_hv_hardware_disable();
+        crate::arch::cpu_hv_hardware_disable();
         true
     }
 }
