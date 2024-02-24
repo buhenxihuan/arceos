@@ -136,7 +136,7 @@ pub fn setup_gpm(id: usize) -> HyperResult<GuestPhysMemorySet> {
         // SCF: memory region for shared memory should be configged here.
     ];
     for r in guest_memory_regions.into_iter() {
-        gpm.map_region(r.into())?;
+        gpm.add_region(r.into())?;
     }
     Ok(gpm)
 }

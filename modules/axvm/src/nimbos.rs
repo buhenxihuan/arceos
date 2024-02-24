@@ -23,16 +23,19 @@ pub fn config_boot_first_vm(hart_id: usize) {
 
     // Alloc guest memory set.
     // Fix: this should be stored inside VM structure.
-    let gpm: crate::mm::GuestPhysMemorySet = config::setup_gpm(hart_id).unwrap();
-    let npt = gpm.nest_page_table_root();
-    info!("{:#x?}", gpm);
+    let gpm = config::setup_gpm(hart_id).unwrap();
+
+    let gpt = gpm.generate_guest_page_table().unwrap();
+
+    let npt_root = gpt.root_paddr().into();
+    info!("gpt at {:#x}\n GPM:\n{:#x?}", npt_root, gpm);
 
     // Main scheduling item, managed by `axtask`
     let vcpu = VCpu::new(
         0,
         crate::arch::cpu_vmcs_revision_id(),
         config::BIOS_ENTRY,
-        npt,
+        npt_root,
     )
     .unwrap();
 

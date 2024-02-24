@@ -1,9 +1,7 @@
 use alloc::collections::BTreeMap;
 use core::fmt::{Debug, Formatter, Result};
 
-use hypercraft::{
-    GuestPageTableTrait, GuestPhysAddr, HostPhysAddr, HyperCraftHal,
-};
+use hypercraft::{GuestPageTableTrait, GuestPhysAddr, HostPhysAddr, HyperCraftHal};
 
 use page_table_entry::MappingFlags;
 
@@ -109,20 +107,20 @@ impl From<GuestMemoryRegion> for MapRegion {
 
 pub struct GuestPhysMemorySet {
     regions: BTreeMap<GuestPhysAddr, MapRegion>,
-    npt: GuestPageTable,
+    // npt: GuestPageTable,
 }
 
 impl GuestPhysMemorySet {
     pub fn new() -> HyperResult<Self> {
         Ok(Self {
-            npt: GuestPageTable::new()?,
+            // npt: GuestPageTable::new()?,
             regions: BTreeMap::new(),
         })
     }
 
-    pub fn nest_page_table_root(&self) -> HostPhysAddr {
-        self.npt.root_paddr().into()
-    }
+    // pub fn nest_page_table_root(&self) -> HostPhysAddr {
+    //     self.npt.root_paddr().into()
+    // }
 
     fn test_free_area(&self, other: &MapRegion) -> bool {
         if let Some((_, before)) = self.regions.range(..other.start).last() {
@@ -138,7 +136,7 @@ impl GuestPhysMemorySet {
         true
     }
 
-    pub fn map_region(&mut self, region: MapRegion) -> HyperResult {
+    pub fn add_region(&mut self, region: MapRegion) -> HyperResult {
         if region.size == 0 {
             return Ok(());
         }
@@ -151,21 +149,30 @@ impl GuestPhysMemorySet {
             );
             return Err(Error::InvalidParam);
         }
-        region.map_to(&mut self.npt)?;
+        // region.map_to(npt)?;
         self.regions.insert(region.start, region);
         Ok(())
     }
 
-    pub fn clear(&mut self) {
-        for region in self.regions.values() {
-            region.unmap_to(&mut self.npt).unwrap();
+    pub fn generate_guest_page_table(&self) -> HyperResult<GuestPageTable> {
+        let mut npt = GuestPageTable::new()?;
+        for (r_start, r) in self.regions.iter() {
+            r.map_to(&mut npt)?;
         }
+        Ok(npt)
+    }
+
+    pub fn clear(&mut self) {
+        // for region in self.regions.values() {
+        //     region.unmap_to(&mut self.npt).unwrap();
+        // }
         self.regions.clear();
     }
 }
 
 impl Drop for GuestPhysMemorySet {
     fn drop(&mut self) {
+        debug!("GuestPhysMemorySet dropped here");
         self.clear();
     }
 }
@@ -173,7 +180,7 @@ impl Drop for GuestPhysMemorySet {
 impl Debug for GuestPhysMemorySet {
     fn fmt(&self, f: &mut Formatter) -> Result {
         f.debug_struct("GuestPhysMemorySet")
-            .field("page_table_root", &self.nest_page_table_root())
+            // .field("page_table_root", &self.nest_page_table_root())
             .field("regions", &self.regions)
             .finish()
     }

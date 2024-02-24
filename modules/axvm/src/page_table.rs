@@ -30,6 +30,7 @@ impl GuestPageTableTrait for GuestPageTable {
         {
             let npt = NestedPageTable::<GuestPagingIfImpl>::try_new()
                 .map_err(|_| HyperError::NoMemory)?;
+            debug!("npt allocated at {:?}", npt.root_paddr());
             Ok(GuestPageTable(npt))
         }
         #[cfg(not(any(target_arch = "riscv64", target_arch = "x86_64", target_arch = "aarch64")))]
