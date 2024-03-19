@@ -752,6 +752,12 @@ impl MemorySet {
 }
 
 impl MemorySet {
+    pub fn owned_mem_iter(&self) -> impl Iterator<Item = (&'_ usize, &'_ MapArea)> {
+        self.owned_mem.iter()
+    }
+}
+
+impl MemorySet {
     pub fn clone(&self) -> AxResult<Self> {
         let mut page_table = PageTable::try_new().expect("Error allocating page table.");
 

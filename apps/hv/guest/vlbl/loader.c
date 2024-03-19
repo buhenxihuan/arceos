@@ -66,7 +66,7 @@ const char cmd[256] = "console=uart8250,io,0x3f8,115200n8 debug\0";
  * load linux kernel image from <void *kernel_image> to <void *loc_real> (for real-mode part) and <void *loc_prot> (for protected-mode part) and fill kernel header
  * 
  * stack_end: end of boot stack
- * 
+ * initramfs: location of initramfs
  * 
  **/
 int load_kernel(void *kernel_image, void *loc_real, void *stack_end, void *loc_prot, void *initramfs, uint32_t initramfs_size) {

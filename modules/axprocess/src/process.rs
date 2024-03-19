@@ -7,7 +7,7 @@ use alloc::{collections::BTreeMap, string::String};
 use axerrno::{AxError, AxResult};
 use axfs::api::{FileIO, OpenFlags};
 use axhal::arch::{write_page_table_root, TrapFrame};
-use axhal::mem::{phys_to_virt, VirtAddr};
+use axhal::mem::{virt_to_phys, phys_to_virt, PhysAddr, VirtAddr};
 use axhal::KERNEL_PROCESS_ID;
 use axmem::MemorySet;
 use axsync::Mutex;
@@ -16,7 +16,7 @@ use core::sync::atomic::{AtomicBool, AtomicI32, AtomicU64, Ordering};
 
 use crate::fd_manager::FdManager;
 use crate::flags::CloneFlags;
-use crate::futex::FutexRobustList;
+use crate::futex::{FutexRobustList, WAIT_FOR_FUTEX};
 use crate::load_app;
 #[cfg(feature = "signal")]
 use crate::signal::SignalModule;
@@ -259,6 +259,22 @@ impl Process {
                 error!("Failed to load hello");
                 return Err(AxError::NotFound);
             };
+
+        debug!("hello loaded, entry: {:?}, user_stack_bottom: {:?}, heap_bottom: {:?}", entry, user_stack_bottom, heap_bottom);
+        debug!("asking guest to map following memory regions:");
+        let mut owned_mem_regions: Vec<(VirtAddr, PhysAddr, usize)> = vec![];
+        for (_, region) in memory_set.owned_mem_iter() {
+            let vaddr = region.vaddr;
+            let paddr = virt_to_phys(region.pages[0].as_ref().unwrap().start_vaddr);
+            let size = region.size();
+            
+            owned_mem_regions.push((vaddr, paddr, size));
+            debug!("vaddr: {:?}, paddr: {:?}, size: {:#x?}", vaddr, paddr, size);
+        }
+
+        for (vaddr, paddr, size) in owned_mem_regions {
+            crate::scf::syscall_forward::scf_special_must_mmap_buffer_push(paddr.as_usize(), vaddr.as_usize(), size);
+        }
 
         debug!(
             "entry at {:?}, user_stack_bottom {:?} heap_bottom {:?}",

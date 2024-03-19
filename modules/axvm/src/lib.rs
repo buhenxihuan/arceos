@@ -41,7 +41,7 @@ pub use axhal::mem::{phys_to_virt, virt_to_phys, PhysAddr};
 pub use page_table::GuestPageTable;
 
 pub use hypercraft::GuestPageTableTrait;
-pub use hypercraft::HyperCraftHal;
+pub use hypercraft::{HyperCraftHal, HypercallArgs};
 pub use hypercraft::HyperError as Error;
 pub use hypercraft::HyperResult as Result;
 pub use hypercraft::{
