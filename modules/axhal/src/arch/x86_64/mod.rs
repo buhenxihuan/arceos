@@ -91,3 +91,21 @@ pub fn flush_tlb(vaddr: Option<VirtAddr>) {
         unsafe { tlb::flush_all() }
     }
 }
+
+/// Reads the thread local storage register.
+///
+/// # Safety
+///
+/// This function is unsafe because it may lead to undesired results.
+pub unsafe fn read_thread_local_storage_register() -> usize {
+    x86::msr::rdmsr(x86::msr::IA32_FS_BASE) as usize
+}
+
+/// Writes the thread local storage register.
+///
+/// # Safety
+///
+/// This function is unsafe because it may lead to undesired results.
+pub unsafe fn write_thread_local_storage_register(value: usize) {
+    x86::msr::wrmsr(x86::msr::IA32_FS_BASE, value as u64)
+}

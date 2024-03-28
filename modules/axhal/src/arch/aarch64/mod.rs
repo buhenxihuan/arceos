@@ -1,7 +1,11 @@
+/// This module contains the AArch64 architecture-specific code.
 mod context;
+
+/// This module contains the trap handling code.
 pub(crate) mod trap;
 
 #[cfg(feature = "hv")]
+/// This module contains the trap handling code for EL2.
 pub(crate) mod trap_el2;
 
 use core::arch::asm;
@@ -18,7 +22,7 @@ pub fn enable_irqs() {
     unsafe { asm!("msr daifclr, #2") };
 }
 
-/// Makes the current CPU to ignore interrupts.
+/// Makes the current CPU ignore interrupts.
 #[inline]
 pub fn disable_irqs() {
     unsafe { asm!("msr daifset, #2") };
@@ -97,8 +101,26 @@ pub fn set_exception_vector_base(vbar_el1: usize) {
     VBAR_EL1.set(vbar_el1 as _);
 }
 
-/// Flushes the data cache line (64 bytes) at the given virtual address
+/// Flushes the data cache line (64 bytes) at the given virtual address.
 #[inline]
 pub fn flush_dcache_line(vaddr: VirtAddr) {
     unsafe { asm!("dc ivac, {0:x}; dsb sy; isb", in(reg) vaddr.as_usize()) };
+}
+
+/// Reads the thread local storage register.
+///
+/// # Safety
+///
+/// This function is unsafe because it may lead to undesired results.
+pub unsafe fn read_thread_local_storage_register() -> usize {
+    todo!()
+}
+
+/// Writes the thread local storage register.
+///
+/// # Safety
+///
+/// This function is unsafe because it may lead to undesired results.
+pub unsafe fn write_thread_local_storage_register(value: usize) {
+    todo!()
 }

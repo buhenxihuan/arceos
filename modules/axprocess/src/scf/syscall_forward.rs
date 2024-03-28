@@ -98,19 +98,8 @@ pub fn scf_special_must_mmap(hpa: usize, va: usize, size: usize) -> isize {
 
 pub fn scf_write(fd: usize, buf: UserInPtr<u8>, len: usize) -> isize {
     scf_special_must_mmap_buffer_check();
-    debug!("scf write_direct fd {} len {:#x}", fd, len);
-    debug!("ptr: {:#x}", buf.as_ptr() as usize);
-
-    let pool = SyscallDataBuffer::get();
-    let chunk_ptr = unsafe { pool.alloc_array_uninit::<u8>(len) };
-    buf.read_buf(unsafe { from_raw_parts_mut(chunk_ptr as _, len) });
-
-    unsafe {
-        for ele in from_raw_parts_mut(chunk_ptr as _, len) {
-            debug!("{:#x}", *ele);
-        }
-        pool.dealloc(chunk_ptr);
-    }
+    trace!("scf write fd {} len {:#x}", fd, len);
+    trace!("ptr: {:#x}", buf.as_ptr() as usize);
 
     let pool = SyscallDataBuffer::get();
     let args = pool.alloc(SyscallArgs {
@@ -118,7 +107,7 @@ pub fn scf_write(fd: usize, buf: UserInPtr<u8>, len: usize) -> isize {
     });
     let cond = SyscallCondVar::new();
     send_request(
-        Sysno::writev, // use writev as a temporary placeholder
+        Sysno::write, // use writev as a temporary placeholder
         pool.offset_of(args),
         ScfRequestToken::from(&cond),
     );
@@ -131,7 +120,7 @@ pub fn scf_write(fd: usize, buf: UserInPtr<u8>, len: usize) -> isize {
 
 pub fn scf_write_indirect(fd: usize, buf: UserInPtr<u8>, len: usize) -> isize {
     scf_special_must_mmap_buffer_check();
-    debug!("scf write fd {} len {:#x}", fd, len);
+    debug!("scf write_indirect fd {} len {:#x}", fd, len);
     assert!(len < CHUNK_SIZE);
     let pool = SyscallDataBuffer::get();
     let chunk_ptr = unsafe { pool.alloc_array_uninit::<u8>(len) };
@@ -155,6 +144,28 @@ pub fn scf_write_indirect(fd: usize, buf: UserInPtr<u8>, len: usize) -> isize {
 
 pub fn scf_read(fd: usize, mut buf: UserOutPtr<u8>, len: usize) -> isize {
     scf_special_must_mmap_buffer_check();
+    trace!("scf read fd {} len {:#x}", fd, len);
+    trace!("ptr: {:#x}", buf.as_ptr() as usize);
+
+    let pool = SyscallDataBuffer::get();
+    let args = pool.alloc(SyscallArgs {
+        args: [fd as u64, buf.as_ptr() as u64, len as u64, 0, 0, 0],
+    });
+    let cond = SyscallCondVar::new();
+    send_request(
+        Sysno::read, // use writev as a temporary placeholder
+        pool.offset_of(args),
+        ScfRequestToken::from(&cond),
+    );
+    let ret = cond.wait();
+    unsafe {
+        pool.dealloc(args);
+    }
+    ret as _
+}
+
+pub fn scf_read_indirect(fd: usize, mut buf: UserOutPtr<u8>, len: usize) -> isize {
+    scf_special_must_mmap_buffer_check();
     assert!(len < CHUNK_SIZE);
     let pool = SyscallDataBuffer::get();
     let chunk_ptr = unsafe { pool.alloc_array_uninit::<u8>(len) };
@@ -171,6 +182,44 @@ pub fn scf_read(fd: usize, mut buf: UserOutPtr<u8>, len: usize) -> isize {
     unsafe {
         buf.write_buf(from_raw_parts(chunk_ptr as _, len));
         pool.dealloc(chunk_ptr);
+        pool.dealloc(args);
+    }
+    ret as _
+}
+
+pub fn scf_open(mut pathname: UserInPtr<u8>, flags: usize, mode: usize) -> isize {
+    scf_special_must_mmap_buffer_check();
+    let pool = SyscallDataBuffer::get();
+    let args = pool.alloc(SyscallArgs {
+        args: [pathname.as_ptr() as u64, flags as u64, mode as u64, 0, 0, 0],
+    });
+    let cond = SyscallCondVar::new();
+    send_request(
+        Sysno::open,
+        pool.offset_of(args),
+        ScfRequestToken::from(&cond),
+    );
+    let ret = cond.wait();
+    unsafe {
+        pool.dealloc(args);
+    }
+    ret as _
+}
+
+pub fn scf_close(fd: usize) -> isize {
+    scf_special_must_mmap_buffer_check();
+    let pool = SyscallDataBuffer::get();
+    let args = pool.alloc(SyscallArgs {
+        args: [fd as u64, 0, 0, 0, 0, 0],
+    });
+    let cond = SyscallCondVar::new();
+    send_request(
+        Sysno::close,
+        pool.offset_of(args),
+        ScfRequestToken::from(&cond),
+    );
+    let ret = cond.wait();
+    unsafe {
         pool.dealloc(args);
     }
     ret as _

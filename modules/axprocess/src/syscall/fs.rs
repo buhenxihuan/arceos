@@ -1,3 +1,5 @@
+use core::panic;
+
 /// File related syscalls.
 use axmem::{UserInPtr, UserOutPtr};
 use axlog::ax_println;
@@ -28,24 +30,28 @@ pub fn sys_write(fd: usize, buf: UserInPtr<u8>, len: usize) -> isize {
     }
 }
 
-// pub fn sys_read(fd: usize, mut buf: UserOutPtr<u8>, len: usize) -> isize {
-//     match fd {
-//         FD_STDIN => {
-//             assert_eq!(len, 1, "Only support len = 1 in sys_read!");
-//             loop {
-//                 if let Some(c) = console_getchar() {
-//                     buf.write(c);
-//                     return 1;
-//                 } else {
-//                     CurrentTask::get().yield_now();
-//                 }
-//             }
-//         }
-//         _ => {
-//             panic!("Unsupported fd in sys_read!");
-//         }
-//     }
-// }
+pub fn sys_read(fd: usize, mut buf: UserOutPtr<u8>, len: usize) -> isize {
+    #[cfg(feature = "hv")]
+    return crate::scf::syscall_forward::scf_read(fd, buf, len);
+
+    panic!("Unsupported sys_read!");
+    // match fd {
+    //     FD_STDIN => {
+    //         assert_eq!(len, 1, "Only support len = 1 in sys_read!");
+    //         loop {
+    //             if let Some(c) = console_getchar() {
+    //                 buf.write(c);
+    //                 return 1;
+    //             } else {
+    //                 CurrentTask::get().yield_now();
+    //             }
+    //         }
+    //     }
+    //     _ => {
+    //         panic!("Unsupported fd in sys_read!");
+    //     }
+    // }
+}
 
 /// iovec - Vector I/O data structure
 /// Ref: https://man7.org/linux/man-pages/man3/iovec.3type.html
@@ -96,3 +102,21 @@ pub fn sys_writev(fd: usize, iov: *const IoVec, iov_cnt: usize) -> isize {
 //         }
 //     }
 // }
+
+pub fn sys_open(filename: UserInPtr<u8>, flags: usize, mode: usize) -> isize {
+    #[cfg(feature = "hv")] 
+    {
+        return crate::scf::syscall_forward::scf_open(filename, flags, mode);
+    }
+
+    panic!("Unsupported sys_open!");
+}
+
+pub fn sys_close(fd: usize) -> isize {
+    #[cfg(feature = "hv")]
+    {
+        return crate::scf::syscall_forward::scf_close(fd);
+    }
+
+    panic!("Unsupported sys_close!");
+}

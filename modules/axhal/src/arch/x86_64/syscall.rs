@@ -27,7 +27,7 @@ pub(crate) unsafe fn set_kernel_stack(kstack_top: usize) {
 #[no_mangle]
 fn x86_syscall_handler(tf: &mut TrapFrame) {
     let syscall_id = tf.rax;
-    debug!(
+    trace!(
         "x86_syscall_handler ID [{}] rdi {:#x} rsi {:#x} rdx {:#x}\n",
         syscall_id, tf.rdi, tf.rsi, tf.rdx
     );

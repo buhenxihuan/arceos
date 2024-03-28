@@ -85,3 +85,21 @@ pub fn flush_tlb(vaddr: Option<VirtAddr>) {
 pub fn set_trap_vector_base(stvec: usize) {
     unsafe { stvec::write(stvec, stvec::TrapMode::Direct) }
 }
+
+/// Reads the thread local storage register.
+///
+/// # Safety
+///
+/// This function is unsafe because it may lead to undesired results.
+pub unsafe fn read_thread_local_storage_register() -> usize {
+    todo!()
+}
+
+/// Writes the thread local storage register.
+///
+/// # Safety
+///
+/// This function is unsafe because it may lead to undesired results.
+pub unsafe fn write_thread_local_storage_register(value: usize) {
+    todo!()
+}
