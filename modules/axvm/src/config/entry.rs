@@ -193,8 +193,9 @@ impl VMCfgEntry {
             region.hpa = ram_base_hpa;
 
             debug!(
-                "Alloc {:#x} Bytes of GlobalPage for ram region\n{}",
+                "Alloc {:#x} Bytes of GlobalPage at {:#x} for ram region\n{}",
                 physical_pages.size(),
+                physical_pages.start_vaddr(),
                 region
             );
 

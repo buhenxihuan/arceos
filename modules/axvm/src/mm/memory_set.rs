@@ -11,6 +11,7 @@ use page_table_entry::MappingFlags;
 use crate::{Error, GuestPageTable, Result as HyperResult};
 
 use axhal::hv::HyperCraftHalImpl;
+use axhal::mem::{phys_to_virt, PhysAddr};
 
 pub const fn is_aligned(addr: usize) -> bool {
     (addr & (HyperCraftHalImpl::PAGE_SIZE - 1)) == 0
@@ -33,9 +34,11 @@ impl Display for GuestMemoryRegion {
     fn fmt(&self, f: &mut Formatter) -> Result {
         write!(
             f,
-            "GuestMemoryRegion: GPA: [{:#x?}], HPA: [{:#x?}] size {:#x}, flags {:?}",
+            "GuestMemoryRegion: GPA: [{:#x?}]\nGuestMemoryRegion: HPA: [{:#x?}]\nGuestMemoryRegion: HVA: [{:#x?}]\nGuestMemoryRegion: size {:#x}, flags {:?}",
             &(self.gpa..self.gpa + self.size),
             &(self.hpa..self.hpa + self.size),
+            &(phys_to_virt(PhysAddr::from(self.hpa)).as_usize()
+                ..phys_to_virt(PhysAddr::from(self.hpa)).as_usize() + self.size),
             &self.size,
             &self.flags
         )?;

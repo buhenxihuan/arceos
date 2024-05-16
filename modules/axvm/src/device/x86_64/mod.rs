@@ -167,7 +167,7 @@ impl<H: HyperCraftHal> DeviceList<H> {
     ) -> Option<HyperResult> {
         let io_info = vcpu.io_exit_info().unwrap();
 
-        // debug!("handle io {:#x?}", io_info);
+        debug!("handle io {:#x?}", io_info);
 
         if let Some(dev) = self.find_port_io_device(io_info.port) {
             return Some(Self::handle_io_instruction_to_device(vcpu, exit_info, dev));
@@ -508,6 +508,7 @@ impl<H: HyperCraftHal> PerVmDevices<H> for X64VmDevices<H> {
         exit_info: &VmExitInfo,
         instr: Option<Instruction>,
     ) -> Option<HyperResult> {
+		debug!("PerVMDevice vmexit handler {:?}", exit_info.exit_reason);
         match exit_info.exit_reason {
             VmxExitReason::EXTERNAL_INTERRUPT => Some(Self::handle_external_interrupt(vcpu)),
             VmxExitReason::EPT_VIOLATION => {
