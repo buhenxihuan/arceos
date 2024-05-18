@@ -4,7 +4,7 @@ use hypercraft::{VCpu, VmCpus, VM};
 
 use super::arch::new_vcpu;
 #[cfg(target_arch = "x86_64")]
-use super::device::{self, X64VcpuDevices, X64VmDevices, NimbosVmDevices};
+use super::device::{self, NimbosVmDevices, X64VcpuDevices, X64VmDevices};
 use crate::GuestPageTable;
 use alloc::sync::Arc;
 use axhal::{current_cpu_id, hv::HyperCraftHalImpl};
@@ -49,7 +49,8 @@ pub fn config_boot_linux() {
         &linux_context,
     )
     .unwrap();
-    let mut vcpus = VmCpus::<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl, BarAllocImpl>>::new();
+    let mut vcpus =
+        VmCpus::<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl, BarAllocImpl>>::new();
     info!("CPU{} add vcpu to vm...", hart_id);
     vcpus.add_vcpu(vcpu).expect("add vcpu failed");
     let mut vm = VM::<
@@ -104,7 +105,8 @@ pub fn boot_vm(vm_id: usize) {
         npt_root,
     )
     .unwrap();
-    let mut vcpus = VmCpus::<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl, BarAllocImpl>>::new();
+    let mut vcpus =
+        VmCpus::<HyperCraftHalImpl, X64VcpuDevices<HyperCraftHalImpl, BarAllocImpl>>::new();
     vcpus.add_vcpu(vcpu).expect("add vcpu failed");
     let mut vm = VM::<
         HyperCraftHalImpl,
