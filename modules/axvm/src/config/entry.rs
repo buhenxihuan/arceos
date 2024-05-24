@@ -58,6 +58,7 @@ pub enum VmType {
     VmTUnknown = 0,
     VmTNimbOS = 1,
     VmTLinux = 2,
+    VmTArceOS = 3,
 }
 
 impl From<usize> for VmType {
@@ -66,6 +67,7 @@ impl From<usize> for VmType {
             0 => Self::VmTUnknown,
             1 => Self::VmTNimbOS,
             2 => Self::VmTLinux,
+            3 => Self::VmTArceOS,
             _ => panic!("Unknown VmType value: {}", value),
         }
     }
@@ -110,7 +112,7 @@ pub struct VMCfgEntry {
 
     cmdline: String,
     /// The cpu_set here refers to the `core_id` from Linux's perspective. \
-    /// Therefore, when looking for the corresponding `cpu_id`, 
+    /// Therefore, when looking for the corresponding `cpu_id`,
     /// we need to perform a conversion using `core_id_to_cpu_id`.
     cpu_set: usize,
 

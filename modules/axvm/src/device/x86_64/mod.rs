@@ -201,6 +201,24 @@ impl<H: HyperCraftHal, B: BarAllocTrait + 'static> DeviceList<H, B> {
         exit_info: &VmxExitInfo,
     ) -> Option<HyperResult> {
         let io_info = vcpu.io_exit_info().unwrap();
+        if io_info.port == 0x604 {
+            let rax = vcpu.regs().rax;
+            let value = match io_info.access_size {
+                1 => rax & 0xff,
+                2 => rax & 0xffff,
+                4 => rax,
+                _ => unreachable!(),
+            } as u32;
+            debug!(
+                "VM exit: io_instruction @ {:#x} trigger 0x604, value: {}",
+                exit_info.guest_rip, value
+            );
+            if value == 0x2000 {
+                // shutdown vm
+                vcpu.poweroff();
+            }
+            return Some(Ok(()));
+        }
         if let Some(dev) = self.find_port_io_device(io_info.port) {
             let mut ret = Some(Self::handle_io_instruction_to_device(vcpu, exit_info, dev));
             // deal with virtio pci cfg access cap

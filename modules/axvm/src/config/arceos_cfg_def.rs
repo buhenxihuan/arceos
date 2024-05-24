@@ -6,50 +6,28 @@ use crate::config::GUEST_PHYS_MEMORY_BASE;
 use crate::config::GUEST_PHYS_MEMORY_SIZE;
 use crate::mm::GuestMemoryRegion;
 
-// See `apps/hv/guest/vlbl/virt_int.c`
-pub fn linux_memory_regions_setup(regions: &mut Vec<GuestMemoryRegion>) {
+// See modules/axconfig/src/config_pc_x86.rs
+pub fn arceos_memory_regions_setup(regions: &mut Vec<GuestMemoryRegion>) {
     let guest_memory_regions = [
-        // 0x0000_0000 ~ 0x0100_0000
+        // 0x0000_0000 ~ 0x0800_0000 (0m ~ 128m)
         GuestMemoryRegion {
-            // Low RAM
+            // Low RAM1
             gpa: GUEST_PHYS_MEMORY_BASE,
             hpa: 0,
-            size: GUEST_PHYS_MEMORY_SIZE,
-            flags: MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
-        },
-        // 0x0100_0000 ~ 0x1000_0000 (16m ~ 256m)
-        GuestMemoryRegion {
-            // Low RAM2
-            gpa: 0x100_0000,
-            hpa: 0,
-            size: 0xf00_0000,
-            flags: MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
-        },
-        // 0x7000_0000 ~ 0x8000_0000
-        GuestMemoryRegion {
-            // RAM
-            gpa: 0x7000_0000,
-            hpa: 0,
-            size: 0x1000_0000,
+            size: 0x800_0000,
             flags: MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
         },
         GuestMemoryRegion {
-            // PCI
-            gpa: 0x8000_0000,
-            hpa: 0x8000_0000,
+            // mmio
+            gpa: 0xb0000000,
+            hpa: 0xb0000000,
             size: 0x1000_0000,
             flags: MappingFlags::READ | MappingFlags::WRITE | MappingFlags::DEVICE,
         },
         GuestMemoryRegion {
             gpa: 0xfe00_0000,
             hpa: 0xfe00_0000,
-            size: 0x1_0000,
-            flags: MappingFlags::READ | MappingFlags::WRITE | MappingFlags::DEVICE,
-        },
-        GuestMemoryRegion {
-            gpa: 0xfeb0_0000,
-            hpa: 0xfeb0_0000,
-            size: 0x10_0000,
+            size: 0xc0_0000,
             flags: MappingFlags::READ | MappingFlags::WRITE | MappingFlags::DEVICE,
         },
         GuestMemoryRegion {

@@ -2,9 +2,9 @@ use alloc::vec::Vec;
 
 use page_table_entry::MappingFlags;
 
-use crate::mm::GuestMemoryRegion;
-use crate::config::GUEST_PHYS_MEMORY_SIZE;
 use crate::config::GUEST_PHYS_MEMORY_BASE;
+use crate::config::GUEST_PHYS_MEMORY_SIZE;
+use crate::mm::GuestMemoryRegion;
 
 pub fn nimbos_memory_regions_setup(regions: &mut Vec<GuestMemoryRegion>) {
     let guest_memory_regions = [
