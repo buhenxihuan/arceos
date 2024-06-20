@@ -26,6 +26,11 @@ pub const ARCEOS_VM_ENTRY: GuestPhysAddr = 0x8000;
 pub const ARCEOS_BIOS_LOAD_GPA: GuestPhysAddr = 0x8000;
 pub const ARCEOS_KERNEL_LOAD_GPA: GuestPhysAddr = 0x20_0000;
 
+// Zephyr helloworld app
+pub const ZEPHYR_VM_ENTRY: GuestPhysAddr = 0x7c00;
+pub const ZEPHYR_BIOS_LOAD_GPA: GuestPhysAddr = 0x7c00;
+pub const ZEPHYR_KERNEL_LOAD_GPA: GuestPhysAddr = 0x70200000;
+
 cfg_block! {
     #[cfg(feature = "guest_nimbos")]
     {
@@ -56,5 +61,6 @@ pub use gpm_def::{init_root_gpm, root_gpm};
 pub mod arceos_cfg_def;
 pub mod linux_cfg_def;
 pub mod nimbos_cfg_def;
+pub mod zephyr_cfg_def;
 
 pub mod entry;

@@ -118,6 +118,13 @@ fn ax_hvc_create_vm(cfg: &mut AxVMCreateArg) -> Result<u32> {
             // No ramdisk for ArceOS helloworld
             cfg.ramdisk_load_gpa = 0;
         }
+        VmType::VmTZephyr => {
+            cfg.vm_entry_point = crate::config::ZEPHYR_VM_ENTRY;
+            cfg.bios_load_gpa = crate::config::ZEPHYR_BIOS_LOAD_GPA;
+            cfg.kernel_load_gpa = crate::config::ZEPHYR_KERNEL_LOAD_GPA;
+            // No ramdisk for ArceOS helloworld
+            cfg.ramdisk_load_gpa = 0;
+        }
         _ => {
             warn!("Unsupported VM Type {}", cfg.vm_type as u64);
             return Err(Error::InvalidParam);
@@ -139,6 +146,7 @@ fn ax_hvc_create_vm(cfg: &mut AxVMCreateArg) -> Result<u32> {
         VmType::VmTNimbOS => crate::config::nimbos_cfg_def::nimbos_memory_regions_setup,
         VmType::VmTLinux => crate::config::linux_cfg_def::linux_memory_regions_setup,
         VmType::VmTArceOS => crate::config::arceos_cfg_def::arceos_memory_regions_setup,
+        VmType::VmTZephyr => crate::config::zephyr_cfg_def::zephyr_memory_regions_setup,
         _ => {
             warn!("Unsupported VM Type {}", cfg.vm_type as u64);
             return Err(Error::InvalidParam);

@@ -59,6 +59,7 @@ pub enum VmType {
     VmTNimbOS = 1,
     VmTLinux = 2,
     VmTArceOS = 3,
+    VmTZephyr = 4,
 }
 
 impl From<usize> for VmType {
@@ -68,6 +69,7 @@ impl From<usize> for VmType {
             1 => Self::VmTNimbOS,
             2 => Self::VmTLinux,
             3 => Self::VmTArceOS,
+            4 => Self::VmTZephyr,
             _ => panic!("Unknown VmType value: {}", value),
         }
     }

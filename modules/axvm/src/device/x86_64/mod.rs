@@ -201,6 +201,21 @@ impl<H: HyperCraftHal, B: BarAllocTrait + 'static> DeviceList<H, B> {
         exit_info: &VmxExitInfo,
     ) -> Option<HyperResult> {
         let io_info = vcpu.io_exit_info().unwrap();
+        if io_info.port == 0x4 {
+            let rax = vcpu.regs().rax;
+            let value = match io_info.access_size {
+                1 => rax & 0xff,
+                2 => rax & 0xffff,
+                4 => rax,
+                _ => unreachable!(),
+            } as u32;
+            debug!(
+                "VM exit: io_instruction @ {:#x} trigger 0x4, vcpu: {:#x?}",
+                exit_info.guest_rip, vcpu
+            );
+            vcpu.advance_rip(exit_info.exit_instruction_length as _);
+            return Some(Ok(()));
+        }
         if io_info.port == 0x604 {
             let rax = vcpu.regs().rax;
             let value = match io_info.access_size {
