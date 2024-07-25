@@ -48,7 +48,7 @@ impl AddrSpace {
     }
 
     /// Creates a new empty address space.
-    pub(crate) fn new_empty(base: VirtAddr, size: usize) -> AxResult<Self> {
+    pub fn new_empty(base: VirtAddr, size: usize) -> AxResult<Self> {
         Ok(Self {
             va_range: VirtAddrRange::from_start_size(base, size),
             areas: MemorySet::new(),
@@ -65,7 +65,7 @@ impl AddrSpace {
         if self.va_range.overlaps(other.va_range) {
             return ax_err!(InvalidInput, "address space overlap");
         }
-        self.pt.copy_from(&other.pt, other.base(), other.size());
+        // self.pt.copy_from(&other.pt, other.base(), other.size());
         Ok(())
     }
 

@@ -10,12 +10,16 @@ repository = "https://github.com/rcore-os/arceos/tree/main/modules/axmm"
 documentation = "https://rcore-os.github.io/arceos/axmm/index.html"
 
 [dependencies]
-axhal = { path = "../axhal", features = ["paging"] }
-axalloc = { path = "../../modules/axalloc" }
+axhal = { git = "https://github.com/arceos-hypervisor/arceos.git", branch = "vmm_rebase", features = ["paging"] }
+axalloc = { git = "https://github.com/arceos-hypervisor/arceos.git", branch = "vmm_rebase" }
 axconfig = { path = "../../modules/axconfig" }
 
 log = "0.4"
-axerrno = { path = "../../crates/axerrno" }
-lazy_init = { path = "../../crates/lazy_init" }
-memory_addr = { path = "../../crates/memory_addr" }
+# axerrno = { path = "../../crates/axerrno" }
+# lazy_init = { path = "../../crates/lazy_init" }
+# memory_addr = { path = "../../crates/memory_addr" }
 memory_set = { path = "../../crates/memory_set" }
+
+axerrno = "0.1.0"
+lazyinit = "0.2"
+memory_addr = "0.2.0"

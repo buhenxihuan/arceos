@@ -15,7 +15,7 @@ pub use self::backend::Backend;
 use axerrno::{AxError, AxResult};
 use axhal::mem::phys_to_virt;
 use axhal::paging::PageTable;
-use lazy_init::LazyInit;
+use lazyinit::LazyInit;
 use memory_addr::{PhysAddr, VirtAddr};
 use memory_set::MappingError;
 
@@ -71,20 +71,20 @@ pub fn kernel_page_table_root() -> PhysAddr {
     KERNEL_ASPACE.page_table_root()
 }
 
-/// Initializes virtual memory management.
-///
-/// It mainly sets up the kernel virtual memory address space and recreate a
-/// fine-grained kernel page table.
-pub fn init_memory_management() {
-    info!("Initialize virtual memory management...");
+// /// Initializes virtual memory management.
+// ///
+// /// It mainly sets up the kernel virtual memory address space and recreate a
+// /// fine-grained kernel page table.
+// pub fn init_memory_management() {
+//     info!("Initialize virtual memory management...");
 
-    let kernel_aspace = new_kernel_aspace().expect("failed to initialize kernel address space");
-    debug!("kernel address space init OK: {:#x?}", kernel_aspace);
-    KERNEL_ASPACE.init_by(kernel_aspace);
-    axhal::paging::set_kernel_page_table(kernel_page_table());
-}
+//     let kernel_aspace = new_kernel_aspace().expect("failed to initialize kernel address space");
+//     debug!("kernel address space init OK: {:#x?}", kernel_aspace);
+//     KERNEL_ASPACE.init_by(kernel_aspace);
+//     axhal::paging::set_kernel_page_table(kernel_page_table());
+// }
 
-/// Initializes kernel paging for secondary CPUs.
-pub fn init_memory_management_secondary() {
-    axhal::paging::set_kernel_page_table(kernel_page_table());
-}
+// /// Initializes kernel paging for secondary CPUs.
+// pub fn init_memory_management_secondary() {
+//     axhal::paging::set_kernel_page_table(kernel_page_table());
+// }

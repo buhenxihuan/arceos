@@ -12,4 +12,5 @@ keywords = ["arceos", "virtual-memory", "memory-area", "mmap"]
 categories = ["os", "memory-management", "no-std"]
 
 [dependencies]
-memory_addr = { path = "../memory_addr" }
+# memory_addr = { path = "../memory_addr" }
+memory_addr = "0.2.0"

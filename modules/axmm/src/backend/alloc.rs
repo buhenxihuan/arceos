@@ -93,7 +93,7 @@ impl Backend {
             // `vaddr` does not need to be aligned. It will be automatically
             // aligned during `pt.remap` regardless of the page size.
             alloc_frame()
-                .and_then(|frame| pt.remap(vaddr, frame, orig_flags).ok())
+                .and_then(|frame| pt.update(vaddr, Some(frame), Some(orig_flags)).ok())
                 .is_some()
         }
     }
