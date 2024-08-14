@@ -20,7 +20,7 @@ fn resolve_config_path(platform: Option<&str>) -> Result<PathBuf> {
     let path = match platform {
         None | Some("") => "defconfig.toml".into(),
         Some(plat) if builtin_platforms.contains(&plat.to_string()) => {
-            let arch = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+            let arch = std::env::var("ARCH").unwrap();
             if arch == "aarch64" && cfg!(feature = "hv") {
                 config_dir.join(format!("{plat}-hv.toml"))
             } else {
