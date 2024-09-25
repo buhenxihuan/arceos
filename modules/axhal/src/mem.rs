@@ -131,12 +131,26 @@ pub(crate) fn default_mmio_regions() -> impl Iterator<Item = MemRegion> {
 pub(crate) fn default_free_regions() -> impl Iterator<Item = MemRegion> {
     let start = virt_to_phys((_ekernel as usize).into()).align_up_4k();
     let end = PhysAddr::from(axconfig::PHYS_MEMORY_END).align_down_4k();
-    core::iter::once(MemRegion {
+    [
+        MemRegion {
         paddr: start,
         size: end.as_usize() - start.as_usize(),
         flags: MemRegionFlags::FREE | MemRegionFlags::READ | MemRegionFlags::WRITE,
         name: "free memory",
-    })
+    },
+    MemRegion {
+        paddr: PhysAddr::from(0x9400000),
+        size: 0xe6c00000,
+        flags: MemRegionFlags::FREE | MemRegionFlags::READ | MemRegionFlags::WRITE,
+        name: "free memory",
+    },
+    MemRegion {
+        paddr: PhysAddr::from(0x1f0000000),
+        size: 0x10000000,
+        flags: MemRegionFlags::FREE | MemRegionFlags::READ | MemRegionFlags::WRITE,
+        name: "free memory",
+    }
+    ].into_iter()
 }
 
 /// Fills the `.bss` section with zeros.
