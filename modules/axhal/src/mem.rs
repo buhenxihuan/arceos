@@ -127,8 +127,8 @@ pub(crate) fn default_mmio_regions() -> impl Iterator<Item = MemRegion> {
 
     //reserve 0-4G range mem as DMA memory used id map ipa  
     mmio_regions.chain(core::iter::once(MemRegion {
-        paddr: PhysAddr::from(0x198000000),
-        size: 0x58000000,
+        paddr: PhysAddr::from(0x80000000),
+        size: 0x70000000,
         flags: MemRegionFlags::RESERVED| MemRegionFlags::READ | MemRegionFlags::WRITE,
         name: "reserved memory",
     }))
@@ -146,12 +146,12 @@ pub(crate) fn default_free_regions() -> impl Iterator<Item = MemRegion> {
         flags: MemRegionFlags::FREE | MemRegionFlags::READ | MemRegionFlags::WRITE,
         name: "free memory",
     },
-    MemRegion {
-        paddr: PhysAddr::from(0x88000000),
-        size: 0x68000000,
-        flags: MemRegionFlags::FREE | MemRegionFlags::READ | MemRegionFlags::WRITE,
-        name: "free memory",
-    }
+    // MemRegion {
+    //     paddr: PhysAddr::from(0x88000000),
+    //     size: 0x68000000,
+    //     flags: MemRegionFlags::FREE | MemRegionFlags::READ | MemRegionFlags::WRITE,
+    //     name: "free memory",
+    // }
     ].into_iter()
 }
 
