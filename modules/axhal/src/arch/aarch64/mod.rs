@@ -53,7 +53,11 @@ pub fn halt() {
 pub fn read_page_table_root() -> PhysAddr {
     #[cfg(not(feature = "hv"))]
     let root = TTBR1_EL1.get();
-    pa!(root as usize)
+
+    #[cfg(feature = "hv")]
+    let root = TTBR0_EL2.get();
+
+    PhysAddr::from(root as usize)
 }
 
 /// Reads the `TTBR0_EL1` register.
