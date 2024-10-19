@@ -23,7 +23,9 @@ fn resolve_config_path(platform: Option<&str>) -> Result<PathBuf> {
             config_dir.join(format!("{plat}.toml"))
         }
         Some(plat) => {
-            let path = PathBuf::from(&plat);
+            let plat_path = std::env::var("AX_PLATFORM_PATH").unwrap_or(plat.to_string());
+            let path = PathBuf::from(&plat_path);
+            println!("Using custom platform config file: {}", path.display());
             if path.is_absolute() {
                 path
             } else {
