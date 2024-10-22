@@ -295,7 +295,6 @@ unsafe extern "C" fn _start() -> ! {
 
         mrs     x19, mpidr_el1
         and     x19, x19, #0xffffff     // get current CPU id
-        
 
         adrp    x8, {boot_stack}        // setup boot stack
         add     x8, x8, {boot_stack_size}

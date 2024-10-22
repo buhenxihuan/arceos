@@ -1,9 +1,30 @@
-use crate::mem::{MemRegion, PhysAddr};
+use crate::mem::{MemRegion, MemRegionFlags, PhysAddr};
 use page_table_entry::{aarch64::A64PTE, GenericPTE, MappingFlags};
+
+/// Returns (rk3588j only) memory regions.
+pub(crate) fn default_rk3588j_regions() -> impl Iterator<Item = MemRegion> {
+    [
+        MemRegion {
+            paddr: PhysAddr::from(0x9400000),
+            size: 0xe6c00000,
+            flags: MemRegionFlags::RESERVED | MemRegionFlags::READ | MemRegionFlags::WRITE,
+            name: "free memory",
+        },
+        MemRegion {
+            paddr: PhysAddr::from(0x1f0000000),
+            size: 0x10000000,
+            flags: MemRegionFlags::FREE | MemRegionFlags::READ | MemRegionFlags::WRITE,
+            name: "free memory",
+        },
+    ]
+    .into_iter()
+}
 
 /// Returns platform-specific memory regions.
 pub(crate) fn platform_regions() -> impl Iterator<Item = MemRegion> {
-    crate::mem::default_free_regions().chain(crate::mem::default_mmio_regions())
+    crate::mem::default_free_regions()
+        .chain(default_rk3588j_regions())
+        .chain(crate::mem::default_mmio_regions())
 }
 
 pub(crate) unsafe fn init_boot_page_table(
@@ -14,7 +35,6 @@ pub(crate) unsafe fn init_boot_page_table(
     let boot_pt_l1 = &mut *boot_pt_l1;
     boot_pt_l0[0] = A64PTE::new_table(PhysAddr::from(boot_pt_l1.as_ptr() as usize));
 
-    
     boot_pt_l1[0] = A64PTE::new_page(
         PhysAddr::from(0),
         MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
@@ -35,22 +55,7 @@ pub(crate) unsafe fn init_boot_page_table(
         MappingFlags::READ | MappingFlags::WRITE | MappingFlags::DEVICE,
         true,
     );
-    // boot_pt_l1[4] = A64PTE::new_page(
-    //     PhysAddr::from(0x1_0000_0000),
-    //     MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
-    //     true,
-    // );
-    // boot_pt_l1[5] = A64PTE::new_page(
-    //     PhysAddr::from(0x1_4000_0000),
-    //     MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
-    //     true,
-    // );
-    // boot_pt_l1[6] = A64PTE::new_page(
-    //     PhysAddr::from(0x1_8000_0000),
-    //     MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
-    //     true,
-    // );
-      boot_pt_l1[7] = A64PTE::new_page(
+    boot_pt_l1[7] = A64PTE::new_page(
         PhysAddr::from(0x1_C000_0000),
         MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
         true,
