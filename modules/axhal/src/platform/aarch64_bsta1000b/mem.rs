@@ -33,17 +33,17 @@ pub(crate) unsafe fn init_boot_page_table(
         true,
     );
     boot_pt_l1[3] = A64PTE::new_page(
-        PhysAddr::from(0xc0000000),
+        pa!(0xc0000000),
         MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
         true,
     );
     boot_pt_l1[6] = A64PTE::new_page(
-        PhysAddr::from(0x180000000),
+        pa!(0x180000000),
         MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
         true,
     );
     boot_pt_l1[7] = A64PTE::new_page(
-        PhysAddr::from(0x1C0000000),
+        pa!(0x1C0000000),
         MappingFlags::READ | MappingFlags::WRITE | MappingFlags::EXECUTE,
         true,
     );
