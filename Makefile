@@ -45,7 +45,7 @@ TARGET_DIR ?= $(PWD)/target
 BLK ?= n
 NET ?= n
 GRAPHIC ?= n
-BUS ?= pci
+BUS ?= mmio
 
 DISK_IMG ?= disk.img
 QEMU_LOG ?= n

@@ -153,21 +153,21 @@ pub extern "C" fn rust_main(cpu_id: usize, dtb: usize) -> ! {
     #[cfg(feature = "multitask")]
     axtask::init_scheduler();
 
-    #[cfg(any(feature = "fs", feature = "net", feature = "display"))]
-    {
-        #[allow(unused_variables)]
-        let all_devices = axdriver::init_drivers();
-        debug!("init driviers Ok");
+    // #[cfg(any(feature = "fs", feature = "net", feature = "display"))]
+    // {
+    //     #[allow(unused_variables)]
+    //     let all_devices = axdriver::init_drivers();
+    //     debug!("init driviers Ok");
 
-        #[cfg(feature = "fs")]
-        axfs::init_filesystems(all_devices.block);
+    //     #[cfg(feature = "fs")]
+    //     axfs::init_filesystems(all_devices.block);
 
-        #[cfg(feature = "net")]
-        axnet::init_network(all_devices.net);
+    //     #[cfg(feature = "net")]
+    //     axnet::init_network(all_devices.net);
 
-        #[cfg(feature = "display")]
-        axdisplay::init_display(all_devices.display);
-    }
+    //     #[cfg(feature = "display")]
+    //     axdisplay::init_display(all_devices.display);
+    // }
 
     #[cfg(feature = "smp")]
     self::mp::start_secondary_cpus(cpu_id);
@@ -233,6 +233,7 @@ fn init_allocator() {
 
 #[cfg(feature = "irq")]
 fn init_interrupt() {
+    debug!("xh init interrupt...");
     use axhal::time::TIMER_IRQ_NUM;
 
     // Setup timer interrupt handler
@@ -254,6 +255,9 @@ fn init_interrupt() {
     }
 
     axhal::irq::register_handler(TIMER_IRQ_NUM, || {
+        // info!("Timer IRQ triggered.");
+        let mpidr = get_mpidr();
+        debug!("Timer IRQ triggered on CPU {:x}.", mpidr);
         update_timer();
         #[cfg(feature = "multitask")]
         axtask::on_timer_tick();
@@ -261,6 +265,19 @@ fn init_interrupt() {
 
     // Enable IRQs before starting app
     axhal::arch::enable_irqs();
+    debug!("xh IRQs enabled OK.");
+}
+
+use core::arch::asm;
+fn get_mpidr() -> u64 {
+    let mpidr: u64;
+    unsafe {
+        asm!(
+            "mrs {mpidr}, MPIDR_EL1", // 从 MPIDR_EL1 读取
+            mpidr = out(reg) mpidr
+        );
+    }
+    mpidr
 }
 
 #[cfg(all(feature = "tls", not(feature = "multitask")))]

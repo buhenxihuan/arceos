@@ -38,6 +38,8 @@ pub extern "C" fn rust_main_secondary(cpu_id: usize) -> ! {
     #[cfg(feature = "paging")]
     axmm::init_memory_management_secondary();
 
+    debug!("Secondary CPU  {:x} memory_management init...", cpu_id);
+
     axhal::platform_init_secondary();
 
     #[cfg(feature = "multitask")]
@@ -56,6 +58,9 @@ pub extern "C" fn rust_main_secondary(cpu_id: usize) -> ! {
     #[cfg(all(feature = "tls", not(feature = "multitask")))]
     super::init_tls();
 
+
+    
+    debug!("Secondary CPU {:x} run idle...", cpu_id);
     #[cfg(feature = "multitask")]
     axtask::run_idle();
     #[cfg(not(feature = "multitask"))]

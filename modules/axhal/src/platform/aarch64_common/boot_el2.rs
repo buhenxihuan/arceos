@@ -121,6 +121,7 @@ unsafe extern "C" fn _start() -> ! {
     // PC = 0x8_0000
     // X0 = dtb
     core::arch::asm!("
+        mov     x20, x0                 // save DTB pointer
         // disable cache and MMU
         mrs x1, sctlr_el2
         bic x1, x1, #0xf
@@ -134,7 +135,13 @@ unsafe extern "C" fn _start() -> ! {
 
         mrs     x19, mpidr_el1
         and     x19, x19, #0xffffff     // get current CPU id
-        mov     x20, x0                 // save DTB pointer
+        
+        add     x8, x19, #60
+        ldr     x9, =0x20008000
+        str     x8, [x9]
+
+
+       
 
         adrp    x8, {boot_stack}        // setup boot stack
         add     x8, x8, {boot_stack_size}
@@ -147,6 +154,8 @@ unsafe extern "C" fn _start() -> ! {
 
         mov     x8, {phys_virt_offset}  // set SP to the high address
         add     sp, sp, x8
+
+
 
         mov     x0, x19                 // call rust_entry(cpu_id, dtb)
         mov     x1, x20
@@ -173,8 +182,14 @@ unsafe extern "C" fn _start() -> ! {
 #[link_section = ".text.boot"]
 unsafe extern "C" fn _start_secondary() -> ! {
     core::arch::asm!("
+
         mrs     x19, mpidr_el1
         and     x19, x19, #0xffffff     // get current CPU id
+
+        sub     x8, x19, #190
+        ldr     x9, =0x20008000
+        str     x8, [x9]
+
 
         mov     sp, x0
         bl      {switch_to_el2}
@@ -183,6 +198,8 @@ unsafe extern "C" fn _start_secondary() -> ! {
 
         mov     x8, {phys_virt_offset}  // set SP to the high address
         add     sp, sp, x8
+        
+
 
         mov     x0, x19                 // call rust_entry_secondary(cpu_id)
         ldr     x8, ={entry}

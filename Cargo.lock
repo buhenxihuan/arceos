@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "arm_gicv2"
 version = "0.1.0"
-source = "git+https://github.com/arceos-hypervisor/arm_gicv2#3b555cb89352499714e6c34c490a2421b939b1a2"
+source = "git+https://github.com/arceos-hypervisor/arm_gicv2?branch=axvcpuhal#2908fd02d954b44695027805de234d5b3d045cf0"
 dependencies = [
  "tock-registers",
 ]

@@ -81,6 +81,7 @@ pub fn init_scheduler() {
 
 /// Initializes the task scheduler for secondary CPUs.
 pub fn init_scheduler_secondary() {
+    debug!("Initialize scheduling for secondary CPU");
     crate::run_queue::init_secondary();
     #[cfg(feature = "irq")]
     crate::timers::init();
@@ -94,6 +95,7 @@ pub fn init_scheduler_secondary() {
 pub fn on_timer_tick() {
     use kernel_guard::NoOp;
     crate::timers::check_events();
+    debug!("timer tick");
     // Since irq and preemption are both disabled here,
     // we can get current run queue with the default `kernel_guard::NoOp`.
     current_run_queue::<NoOp>().scheduler_timer_tick();
@@ -199,5 +201,6 @@ pub fn run_idle() -> ! {
         debug!("idle task: waiting for IRQs...");
         #[cfg(feature = "irq")]
         axhal::arch::wait_for_irqs();
+        debug!("i have accept a irq");
     }
 }

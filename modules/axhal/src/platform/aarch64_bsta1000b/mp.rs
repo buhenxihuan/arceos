@@ -7,6 +7,7 @@ pub const CPU_HWID: [usize; MAX_HARTS] = [0x00, 0x100, 0x200, 0x300, 0x400, 0x50
 
 /// Starts the given secondary CPU with its boot stack.
 pub fn start_secondary_cpu(cpu_id: usize, stack_top: PhysAddr) {
+    info!("cpu_id is {}",cpu_id);
     if cpu_id >= MAX_HARTS {
         error!("No support for bsta1000b core {}", cpu_id);
         return;

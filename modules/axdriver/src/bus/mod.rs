@@ -1,4 +1,4 @@
 #[cfg(bus = "mmio")]
 mod mmio;
-#[cfg(bus = "pci")]
-mod pci;
+// #[cfg(bus = "pci")]
+// mod pci;

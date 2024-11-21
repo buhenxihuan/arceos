@@ -1,7 +1,7 @@
 # Architecture identifier.
 arch = "aarch64"
 # Platform identifier.
-platform = "aarch64-bsta1000b"
+platform = "aarch64-bsta1000b-hv"
 # Platform family.
 family = "aarch64-bsta1000b"
 
@@ -26,11 +26,11 @@ kernel-aspace-size = "0x0000_ffff_ffff_f000"
 # MMIO regions with format (`base_paddr`, `size`).
 mmio-regions = [
     ["0x20008000", "0x1000"], # uart8250 UART0
-    # ["0x32000000", "0x8000"], # arm,gic-400
-    # ["0x32011000", "0x1000"], # CPU CSR
-    # ["0x33002000", "0x1000"], # Top CRM
-    # ["0x70035000", "0x1000"], # CRM reg
-    # ["0x70038000", "0x1000"], # aon pinmux
+    ["0x32000000", "0x8000"], # arm,gic-400
+    ["0x32011000", "0x1000"], # CPU CSR
+    ["0x33002000", "0x1000"], # Top CRM
+    ["0x70035000", "0x1000"], # CRM reg
+    ["0x70038000", "0x1000"], # aon pinmux
 ]
 
 virtio-mmio-regions = []

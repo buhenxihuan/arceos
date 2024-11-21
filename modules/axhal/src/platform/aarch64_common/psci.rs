@@ -79,6 +79,7 @@ fn psci_hvc_call(func: u32, arg0: usize, arg1: usize, arg2: usize) -> usize {
 }
 
 fn psci_call(func: u32, arg0: usize, arg1: usize, arg2: usize) -> Result<(), PsciError> {
+    debug!("func {:x} arg0 {:x} arg1 {:x} arg2 {:x}", func,arg0,arg1,arg2);
     let ret = match axconfig::PSCI_METHOD {
         "smc" => arm_smccc_smc(func, arg0, arg1, arg2),
         "hvc" => psci_hvc_call(func, arg0, arg1, arg2),

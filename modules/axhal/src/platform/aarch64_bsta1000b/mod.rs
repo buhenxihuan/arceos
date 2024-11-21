@@ -37,6 +37,7 @@ pub(crate) unsafe extern "C" fn rust_entry(cpu_id: usize, dtb: usize) {
 
 #[cfg(feature = "smp")]
 pub(crate) unsafe extern "C" fn rust_entry_secondary(cpu_id: usize) {
+    debug!("the rust_entry_secondary cpu_id is {} start",cpu_id);
     let cpu_id = cpu_id / 256;
     crate::arch::set_exception_vector_base(exception_vector_base as usize);
     crate::cpu::init_secondary(cpu_id);
