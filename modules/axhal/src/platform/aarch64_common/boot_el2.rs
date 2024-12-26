@@ -48,7 +48,7 @@ unsafe fn init_mmu_el2() {
             + HCR_EL2::RW::EL1IsAarch64
             + HCR_EL2::IMO::EnableVirtualIRQ // Physical IRQ Routing.
             + HCR_EL2::FMO::EnableVirtualFIQ // Physical FIQ Routing.
-            + HCR_EL2::TSC::EnableTrapEl1SmcToEl2,
+            + HCR_EL2::TSC::EnableTrapEl1SmcToEl2
     );
 
     // Device-nGnRE memory

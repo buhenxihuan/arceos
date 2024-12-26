@@ -237,8 +237,9 @@ fn init_interrupt() {
     use axhal::time::TIMER_IRQ_NUM;
 
     // Setup timer interrupt handler
-    const PERIODIC_INTERVAL_NANOS: u64 =
-        axhal::time::NANOS_PER_SEC / axconfig::TICKS_PER_SEC as u64;
+    // const PERIODIC_INTERVAL_NANOS: u64 =
+        // axhal::time::NANOS_PER_SEC / axconfig::TICKS_PER_SEC as u64;
+    const PERIODIC_INTERVAL_NANOS: u64 = 0x10000000000 as u64;
 
     #[percpu::def_percpu]
     static NEXT_DEADLINE: u64 = 0;
@@ -256,8 +257,8 @@ fn init_interrupt() {
 
     axhal::irq::register_handler(TIMER_IRQ_NUM, || {
         // info!("Timer IRQ triggered.");
-        let mpidr = get_mpidr();
-        debug!("Timer IRQ triggered on CPU {:x}.", mpidr);
+        // let mpidr = get_mpidr();
+        // info!("Timer IRQ triggered on CPU {:x}.", mpidr);
         update_timer();
         #[cfg(feature = "multitask")]
         axtask::on_timer_tick();

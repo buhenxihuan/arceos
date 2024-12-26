@@ -198,9 +198,24 @@ pub fn exit(exit_code: i32) -> ! {
 pub fn run_idle() -> ! {
     loop {
         yield_now();
+        let mpidr = get_mpidr();
+        debug!("mpidr: 0x{:x}",mpidr);
         debug!("idle task: waiting for IRQs...");
         #[cfg(feature = "irq")]
         axhal::arch::wait_for_irqs();
         debug!("i have accept a irq");
     }
+}
+
+
+use core::arch::asm;
+fn get_mpidr() -> u64 {
+    let mpidr: u64;
+    unsafe {
+        asm!(
+            "mrs {mpidr}, HCR_EL2", // 从 MPIDR_EL1 读取
+            mpidr = out(reg) mpidr
+        );
+    }
+    mpidr
 }
