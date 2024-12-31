@@ -1,7 +1,7 @@
-use crate::mem::MemRegion;
+use crate::mem::{MemRegion, MemRegionFlags};
 use page_table_entry::{aarch64::A64PTE, GenericPTE, MappingFlags};
 
-/// Returns (rk3588j only) memory regions.
+/// Returns (a1000b only) memory regions.
 pub(crate) fn default_a1000b_regions() -> impl Iterator<Item = MemRegion> {
     [MemRegion {
         paddr: pa!(0x80000000),
